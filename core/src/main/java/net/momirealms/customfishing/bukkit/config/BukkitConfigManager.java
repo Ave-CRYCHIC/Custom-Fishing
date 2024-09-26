@@ -486,7 +486,7 @@ public class BukkitConfigManager extends ConfigManager {
             return (item, context) -> {
                 double minSize = min.evaluate(context);
                 double maxSize = max.evaluate(context);
-                float size = (float) RandomUtils.generateRandomDouble(minSize, maxSize);
+                float size = (float) RandomUtils.generateRandomDouble_ND(minSize, maxSize);
                 Double sm = context.arg(ContextKeys.SIZE_MULTIPLIER);
                 if (sm == null) sm = 1.0;
                 Double sa = context.arg(ContextKeys.SIZE_ADDER);

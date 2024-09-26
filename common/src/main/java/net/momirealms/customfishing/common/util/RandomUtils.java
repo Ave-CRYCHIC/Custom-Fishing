@@ -69,6 +69,18 @@ public class RandomUtils {
         return min + (max - min) * getInstance().random.nextDouble();
     }
 
+    public static double generateRandomDouble_ND(double min, double max) {
+        double mean = (min + max) / 2;
+        // To cover 99.9% of values within the min-max range, the range covers 3.29 standard deviations on each side of the mean
+        double stdDev = (max - mean) / 3.891;
+        double value;
+        // Generate a normally distributed value with mean 0 and standard deviation 1
+        value = getInstance().random.nextGaussian();
+        // Scale and shift the value to our desired mean and standard deviation
+        value = value * stdDev + mean;
+        // If the value is outside the min-max range, it will be regenerated in the next loop iteration
+        return value;
+    }
     /**
      * Generates a random float between the specified minimum and maximum values (inclusive).
      *
