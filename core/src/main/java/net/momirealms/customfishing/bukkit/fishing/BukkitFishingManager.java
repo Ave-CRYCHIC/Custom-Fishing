@@ -35,10 +35,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.FishHook;
-import org.bukkit.entity.Item;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
@@ -259,16 +256,16 @@ public class BukkitFishingManager implements FishingManager, Listener {
                 hook.get().onReelIn();
                 return;
             }
-        }
 
-        if (player.getGameMode() != GameMode.CREATIVE) {
-            ItemStack itemStack = player.getInventory().getItemInMainHand();
-            if (itemStack.getType() != Material.FISHING_ROD) itemStack = player.getInventory().getItemInOffHand();
-            if (plugin.getItemManager().hasCustomMaxDamage(itemStack)) {
-                event.getHook().pullHookedEntity();
-                event.getHook().remove();
-                event.setCancelled(true);
-                plugin.getItemManager().increaseDamage(player, itemStack, event.getCaught() instanceof Item ? 3 : 5, true);
+            if (player.getGameMode() != GameMode.CREATIVE) {
+                ItemStack itemStack = player.getInventory().getItemInMainHand();
+                if (itemStack.getType() != Material.FISHING_ROD) itemStack = player.getInventory().getItemInOffHand();
+                if (plugin.getItemManager().hasCustomMaxDamage(itemStack)) {
+                    event.setCancelled(true);
+                    event.getHook().pullHookedEntity();
+                    hook.get().destroy();
+                    plugin.getItemManager().increaseDamage(player, itemStack, event.getCaught() instanceof Item ? 3 : 5, true);
+                }
             }
         }
     }
@@ -317,9 +314,13 @@ public class BukkitFishingManager implements FishingManager, Listener {
         if (EventUtils.fireAndCheckCancel(new RodCastEvent(event, gears))) {
             return;
         }
-        plugin.debug(context);
+        plugin.debug(context::toString);
         CustomFishingHook customHook = new CustomFishingHook(plugin, hook, gears, context);
-        this.castHooks.put(player.getUniqueId(), customHook);
+        CustomFishingHook previous = this.castHooks.put(player.getUniqueId(), customHook);
+        if (previous != null) {
+            plugin.debug("Previous hook is still in cache, which is not an expected behavior");
+            previous.stop();
+        }
     }
 
     private void onInGround(PlayerFishEvent event) {
@@ -350,11 +351,29 @@ public class BukkitFishingManager implements FishingManager, Listener {
         });
     }
 
+    @EventHandler(priority = EventPriority.LOW)
+    public void onInteractEntity(PlayerInteractAtEntityEvent event) {
+        Entity entity = event.getRightClicked();
+        if (entity.getType() != EntityType.ARMOR_STAND) return;
+        if (entity.getPersistentDataContainer().has(Objects.requireNonNull(NamespacedKey.fromString("temp-entity", BukkitCustomFishingPlugin.getInstance().getBootstrap())))) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.LOW)
+    public void onInteractEntity(PlayerInteractEntityEvent event) {
+        Entity entity = event.getRightClicked();
+        if (entity.getType() != EntityType.ARMOR_STAND) return;
+        if (entity.getPersistentDataContainer().has(Objects.requireNonNull(NamespacedKey.fromString("temp-entity", BukkitCustomFishingPlugin.getInstance().getBootstrap())))) {
+            event.setCancelled(true);
+        }
+    }
+
     @Override
     public void destroyHook(UUID uuid) {
-        this.getFishHook(uuid).ifPresent(hook -> {
+        CustomFishingHook hook = this.castHooks.remove(uuid);
+        if (hook != null) {
             hook.stop();
-            this.castHooks.remove(uuid);
-        });
+        }
     }
 }

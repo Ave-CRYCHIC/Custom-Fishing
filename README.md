@@ -12,7 +12,7 @@
 ![GitHub](https://img.shields.io/github/license/Xiao-MoMi/Custom-Fishing)
 
 CustomFishing is a Paper plugin designed to offer an extensive range of minigames and a robust condition and action system for fishing. Introducing a novel weight system concept, CustomFishing provides unparalleled customization opportunities while ensuring optimal performance. The plugin goes beyond standard features by allowing you to register custom mechanism, actions, conditions, games, and even parsers for configuration file formats. This flexibility makes it a powerful API for developers, enabling the creation of innovative fishing experiences, such as lava fishing or void fishing, tailored to your specific needs.
-## How to build
+## How to Build
 
 #### Command Line
 Install JDK 17 & 21. \
@@ -23,10 +23,17 @@ Execute ".\gradlew build" and get the artifact under /target folder
 Import the project and execute gradle build action. \
 Get the artifact under /target folder
 
-## Support the developer
+## How to Contribute
 
-Polymart: https://polymart.org/resource/customfishing.2723 \
-Afdian: https://afdian.com/@xiaomomi
+#### Translations
+Clone this project and create a new language file in the /common/src/main/resources/translations directory. \
+Once your changes are ready, open a pull request for review. We appreciate your works!
+
+## Support the Developer
+
+Polymart: https://polymart.org/resource/customfishing.2723/ \
+BuiltByBit: https://builtbybit.com/resources/customfishing.36361/ \
+Afdian: https://afdian.com/@xiaomomi/
 
 ## CustomFishing API
 
@@ -74,5 +81,5 @@ dependencies {
     compileOnly("com.github.Xiao-MoMi:Custom-Fishing:{VERSION}")
 }
 ```
-#### Fun facts
+#### Fun Facts
 I misspelled mechanism as mechanic. I should have realized this earlier XD

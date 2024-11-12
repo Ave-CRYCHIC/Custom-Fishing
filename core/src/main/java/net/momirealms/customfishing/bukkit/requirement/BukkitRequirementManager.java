@@ -273,12 +273,13 @@ public class BukkitRequirementManager implements RequirementManager<Player> {
                 boolean mainOrOff = section.getString("hand","main").equalsIgnoreCase("main");
                 int amount = section.getInt("amount", 1);
                 List<String> items = ListUtils.toList(section.get("item"));
+                boolean any = items.contains("any") || items.contains("*");
                 return context -> {
                     ItemStack itemStack = mainOrOff ?
                             context.holder().getInventory().getItemInMainHand()
                             : context.holder().getInventory().getItemInOffHand();
                     String id = plugin.getItemManager().getItemID(itemStack);
-                    if (items.contains(id) && itemStack.getAmount() >= amount) return true;
+                    if ((items.contains(id) || any) && itemStack.getAmount() >= amount) return true;
                     if (runActions) ActionManager.trigger(context, actions);
                     return false;
                 };
@@ -972,7 +973,7 @@ public class BukkitRequirementManager implements RequirementManager<Player> {
                 plugin.getPluginLogger().warn("Invalid value type: " + args.getClass().getSimpleName() + " found at == requirement which is expected be `Section`");
                 return Requirement.empty();
             }
-        }, "==");
+        }, "==", "=");
         registerRequirement((args, actions, runActions) -> {
             if (args instanceof Section section) {
                 MathValue<Player> v1 = MathValue.auto(section.get("value1"));
@@ -1184,7 +1185,7 @@ public class BukkitRequirementManager implements RequirementManager<Player> {
                     case ">" -> {
                         if (level > required) result = true;
                     }
-                    case "==" -> {
+                    case "=", "==" -> {
                         if (level == required) result = true;
                     }
                     case "!=" -> {
